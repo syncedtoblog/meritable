@@ -5,23 +5,32 @@ services:
     runtime: rust
     rootDir: .
     plan: free
-    buildCommand: cargo build --release -p issuer
+    buildCommand: cargo build --release -p issuer --bin issuer
     startCommand: ./target/release/issuer
-    envVars:
-      - key: PORT
-        value: 8080
+    healthCheckPath: /health
 
-  # 2. Frontend PWA
+  # 2. Static PWA (Vite build output)
   - type: web
     name: meritable-pwa
-    runtime: node
+    runtime: static
     rootDir: pwa
-    plan: free
-    buildCommand: npm install && npm run build
-    startCommand: npm run start
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
     envVars:
+      - key: NODE_VERSION
+        value: "22"
       - key: VITE_ISSUER_URL
         fromService:
           type: web
           name: meritable-issuer-api
           property: host
+      - key: VITE_CONTRACT_ID
+        value: CA7ES556GJI5KB5EPQDTHKINO57JCM5ETJ6DHF4GZIXALBKO6NXDI453
+      - key: VITE_NETWORK_PASSPHRASE
+        value: "Test SDF Network ; September 2015"
+      - key: VITE_RPC_URL
+        value: https://soroban-testnet.stellar.org

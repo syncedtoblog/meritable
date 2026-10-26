@@ -1,6 +1,15 @@
+function normalizeHttpUrl(value, fallback) {
+  const raw = (value || fallback || '').trim().replace(/\/+$/, '')
+  if (!raw) return ''
+  return /^https?:\/\//i.test(raw) ? raw : `https://${raw}`
+}
+
 export const CONFIG = {
-  issuerUrl: import.meta.env.VITE_ISSUER_URL || 'http://localhost:8080',
-  contractId: import.meta.env.VITE_CONTRACT_ID || '',
+  issuerUrl: normalizeHttpUrl(
+    import.meta.env.VITE_ISSUER_URL,
+    'http://localhost:8080',
+  ),
+  contractId: (import.meta.env.VITE_CONTRACT_ID || '').trim(),
   networkPassphrase:
     import.meta.env.VITE_NETWORK_PASSPHRASE || 'Test SDF Network ; September 2015',
   rpcUrl: import.meta.env.VITE_RPC_URL || 'https://soroban-testnet.stellar.org',
