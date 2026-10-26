@@ -15,7 +15,7 @@ export default function App() {
       <header>
         <hgroup>
           <h1>Meritable</h1>
-          <p>Prove a property of your private data without revealing the data.</p>
+          <p>Show the proof, not the data.</p>
         </hgroup>
       </header>
 

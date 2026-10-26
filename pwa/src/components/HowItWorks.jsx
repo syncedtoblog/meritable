@@ -3,7 +3,7 @@ export default function HowItWorks() {
     <section className="card how" aria-labelledby="how-title">
       <header className="how-header">
         <p className="eyebrow">The idea</p>
-        <h2 id="how-title">Prove a property, not the data</h2>
+        <h2 id="how-title">How it works</h2>
         <p className="story">
           <strong>Meet Alice.</strong> Her bank knows her credit score is 812.
           She wants a lender to know she qualifies for the Gold tier
