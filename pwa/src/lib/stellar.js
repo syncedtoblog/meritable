@@ -8,7 +8,8 @@ import {
   BASE_FEE,
 } from '@stellar/stellar-sdk'
 import {
-  getAddress,
+  isConnected,
+  requestAccess,
   getNetworkDetails,
   signTransaction,
 } from '@stellar/freighter-api'
@@ -21,9 +22,28 @@ function createServer() {
 }
 
 export async function connectFreighter() {
-  const result = await getAddress()
+  // isConnected() has a 2s timeout when the extension is absent, so we fail
+  // fast instead of hanging on a message that will never be answered.
+  const status = await isConnected()
+  if (status.error) {
+    throw new Error(status.error.message || 'Freighter is not available')
+  }
+  if (!status.isConnected) {
+    throw new Error(
+      'Freighter extension not detected. Install it from https://freighter.app, unlock it, and refresh this page.',
+    )
+  }
+
+  // requestAccess() triggers the permission prompt when access has not yet
+  // been granted for this origin. getAddress() alone does not prompt.
+  const result = await requestAccess()
   if (result.error) {
-    throw new Error(result.error.message || 'Freighter is not available')
+    throw new Error(result.error.message || 'Freighter access was rejected')
+  }
+  if (!result.address) {
+    throw new Error(
+      'Freighter returned no address. Unlock the extension and try again.',
+    )
   }
   return result.address
 }
