@@ -24,10 +24,7 @@ services:
       - key: NODE_VERSION
         value: "22"
       - key: VITE_ISSUER_URL
-        fromService:
-          type: web
-          name: meritable-issuer-api
-          property: host
+        value: https://meritable-issuer-api.onrender.com
       - key: VITE_CONTRACT_ID
         value: CA7ES556GJI5KB5EPQDTHKINO57JCM5ETJ6DHF4GZIXALBKO6NXDI453
       - key: VITE_NETWORK_PASSPHRASE
