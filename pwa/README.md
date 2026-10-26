@@ -44,6 +44,7 @@ npm run preview
 | Component | Purpose |
 | --- | --- |
 | `WalletPanel` | Connect Freighter and show network |
+| `HowItWorks` | Explainer with the Alice / issuer / verifier flow diagram |
 | `VaultPanel` | Request a demo credential and store it encrypted |
 | `ProvePanel` | Generate a proof and submit the verification transaction |
 | `SessionPanel` | Query `is_session_valid` and show local proof history |

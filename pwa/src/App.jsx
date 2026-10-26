@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import HowItWorks from './components/HowItWorks.jsx'
 import WalletPanel from './components/WalletPanel.jsx'
 import VaultPanel from './components/VaultPanel.jsx'
 import ProvePanel from './components/ProvePanel.jsx'
@@ -14,9 +15,11 @@ export default function App() {
       <header>
         <hgroup>
           <h1>Meritable</h1>
-          <p>Prove a credential condition without revealing the credential.</p>
+          <p>Prove a property of your private data without revealing the data.</p>
         </hgroup>
       </header>
+
+      <HowItWorks />
 
       <div className="notice">
         <strong>Demo issuer.</strong> Credentials requested here are signed by a
