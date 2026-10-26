@@ -1,6 +1,5 @@
-mod crypto;
-
 use ark_ff::PrimeField;
+use issuer::crypto;
 use axum::{
     routing::{get, post},
     Json, Router,
@@ -50,8 +49,10 @@ async fn issue_credential(
     let commitment = crypto::compute_poseidon_hash_4(&[user_field, key_field, val_field, salt_field])
         .map_err(|e| (axum::http::StatusCode::INTERNAL_SERVER_ERROR, e))?;
 
-    // 6. Return response with Issuer test keypair coordinates & signature structure
+    // 6. Sign the commitment with the PoC issuer key
     // (In production, the issuer holds the Grumpkin private key in secure hardware/env)
+    let signed = crypto::sign_commitment(commitment);
+
     let resp = crypto::BoundCredentialResponse {
         user_address: req.user_address,
         key: req.key,
@@ -59,14 +60,14 @@ async fn issue_credential(
         salt: crypto::field_to_hex(&salt_field),
         commitment: crypto::field_to_hex(&commitment),
         issuer_pubkey: crypto::IssuerPublicKey {
-            x: "0x065812e335a97c2108ea8cf4ccfe2f9dd6b117a0714f5e18461575be93f61da6".to_string(),
-            y: "0x1a915003e8ec534f9a15d926a7ded478e178468ccc4f28e236e67450a55ac622".to_string(),
+            x: crypto::field_to_hex(&signed.issuer_pubkey_x),
+            y: crypto::field_to_hex(&signed.issuer_pubkey_y),
         },
         signature: crypto::SchnorrSignature {
-            sig_s_lo: "0xf3bc3b7147acb9c621fd9f72dbf15ffa".to_string(),
-            sig_s_hi: "0x08599f379f0301dfefdbd0272554454d".to_string(),
-            sig_e_lo: "0x97065383ebbbd76620398792bd259bc2".to_string(),
-            sig_e_hi: "0x2ceaee87f45b7a417f0ffb05451a8c92".to_string(),
+            sig_s_lo: crypto::field_to_hex(&signed.sig_s_lo),
+            sig_s_hi: crypto::field_to_hex(&signed.sig_s_hi),
+            sig_e_lo: crypto::field_to_hex(&signed.sig_e_lo),
+            sig_e_hi: crypto::field_to_hex(&signed.sig_e_hi),
         },
     };
 

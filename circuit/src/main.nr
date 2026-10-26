@@ -57,7 +57,7 @@ fn main(
     let commitment = hash_4([user_address, key, value, salt]);
 
     // 4. Verify Issuer's BN254 Schnorr Signature over the commitment
-    let issuer_pubkey = EmbeddedCurvePoint::new(issuer_pubkey_x, issuer_pubkey_y);
+    let issuer_pubkey = EmbeddedCurvePoint { x: issuer_pubkey_x, y: issuer_pubkey_y, is_infinite: false };
     let sig_s = EmbeddedCurveScalar::new(sig_s_lo, sig_s_hi);
     let sig_e = EmbeddedCurveScalar::new(sig_e_lo, sig_e_hi);
     assert_valid_signature(issuer_pubkey, (sig_s, sig_e), commitment);

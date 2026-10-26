@@ -7,6 +7,10 @@ edition = "2021"
 name = "issuer"
 path = "src/main.rs"
 
+[[bin]]
+name = "gen_prover"
+path = "src/bin/gen_prover.rs"
+
 [dependencies]
 axum = "0.7"
 tokio = { version = "1.0", features = ["full"] }
@@ -14,9 +18,10 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 tower-http = { version = "0.5", features = ["cors"] }
 stellar-strkey = "0.0.16"
-ark-bn254 = "0.5.0"
-ark-ff = "0.5.0"
-ark-ec = "0.5.0"
+ark-bn254 = "0.6.0"
+ark-ff = "0.6.0"
+ark-ec = "0.6.0"
+ark-grumpkin = "0.6.0"
+outbe-poseidon = "0.13.0"
 rand = "0.8"
 hex = "0.4"
-light-poseidon = "0.4.1"
