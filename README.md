@@ -284,3 +284,90 @@ The build and dev server have been verified. Remaining work:
 1. Deploy the contract to Stellar Testnet and set `VITE_CONTRACT_ID`.
 2. Run the full flow in a real browser (WebAuthn PRF, bb.js WASM, Freighter).
 3. Add end-to-end tests from spec Step 5.
+
+---
+
+## Usage (demo)
+
+A walkthrough of the four numbered panels. The app runs at
+`http://localhost:5173` after `npm run dev` in `pwa/`.
+
+### Before you start
+
+1. Install the [Freighter](https://freighter.app) browser extension and switch
+   it to **Testnet**.
+2. Fund the wallet — it needs XLM for transaction fees and Soroban. Use
+   [Friendbot](https://friendbot.stellar.org) or the Fund button in Freighter.
+3. Run the issuer on `:8080` (`cargo run -p issuer`) and confirm
+   `curl localhost:8080/health` returns `ok`.
+4. Set `VITE_CONTRACT_ID` in `pwa/.env` to a deployed verifier contract on
+   Testnet. Without it, steps 3–4 fail.
+
+### 1. Wallet
+
+- Click **Connect Freighter** and approve the permission popup.
+- The panel shows your `G…` address and the network (`TESTNET`).
+- This address is bound into the credential as `user_address` and signs the
+  on-chain transaction. Nothing else works until this is connected.
+
+### 2. Credential vault
+
+- Enter an **Attribute key** (default `credit_score`) and **Value** (default
+  `750`), then click **Request demo credential**.
+  1. The PWA POSTs `{ user_address, key, value }` to the issuer at
+     `http://localhost:8080/issue`.
+  2. The issuer generates a random 256-bit salt, computes a Poseidon BN254
+     commitment over `(user, key, value, salt)`, and signs it with its BN254
+     Schnorr key.
+  3. The response (salt, commitment, issuer public key, signature) returns to
+     the browser.
+  4. The vault tries WebAuthn PRF (FaceID/TouchID/Windows Hello). On first use
+     it creates a passkey and prompts for biometrics. If unsupported or
+     declined, it falls back to a **dev-insecure** AES key stored in IndexedDB
+     and logs a warning.
+  5. The credential is AES-256-GCM encrypted and written to IndexedDB.
+- A row appears with the key/value and commitment. Use **Refresh vault** to
+  reload from IndexedDB or **Remove** to delete an entry.
+- The demo issuer signs whatever it is given and does not authenticate users.
+  Do not use real personal data.
+
+### 3. Prove a condition
+
+- Select a credential from the vault, an **Operator** (`>=`, `<=`, `==`, `>`,
+  `<`, `!=`), and a **Threshold** (e.g. `700`), then click
+  **Generate proof & verify**.
+  1. The PWA builds the Noir witness from the decrypted credential plus
+     operator, threshold, and a fresh random nonce.
+  2. The Web Worker loads `/circuit/meritable_circuit.json`, executes the
+     circuit, and generates an UltraHonk proof in-browser. The value and salt
+     never leave the device.
+  3. It builds and simulates the `verify_credential` Soroban transaction.
+  4. Freighter prompts you to sign; approve it.
+  5. It submits the transaction and polls until confirmed.
+- On success the status shows `Verified. Tx: <hash>` and the session is added to
+  local history.
+- If the condition is false (e.g. `750 >= 800`), the circuit fails locally and
+  no transaction is sent.
+
+### 4. Session status
+
+- Enter the **Target key** matching the credential you proved (e.g.
+  `credit_score`) and click **Check session**.
+- The panel calls the contract's `is_session_valid(user, target_key)` view
+  method.
+- A badge shows **active** or **none**, along with local proof history.
+- Sessions live in temporary storage with a ~500-ledger TTL (roughly 30–40
+  minutes).
+
+### Troubleshooting
+
+- **Signing fails:** check Freighter is on Testnet and the account is funded.
+- **Session shows "none":** the target key must match the credential's key, and
+  the session TTL may have expired.
+- **Proof generation seems stuck:** give it a few seconds on first run; the
+  worker loads the bb.js WASM chunks. Check the browser DevTools console for
+  worker errors.
+- **No biometrics:** the vault falls back to a dev key and labels records
+  `dev-insecure`. Remove the fallback before production.
+- **Replay:** each proof uses a fresh client-generated nonce; the contract burns
+  it. Replaying a proof reverts on-chain.
