@@ -1,0 +1,27 @@
+services:
+  # 1. Rust Issuer API
+  - type: web
+    name: meritable-issuer-api
+    runtime: rust
+    rootDir: .
+    plan: free
+    buildCommand: cargo build --release -p issuer
+    startCommand: ./target/release/issuer
+    envVars:
+      - key: PORT
+        value: 8080
+
+  # 2. Frontend PWA
+  - type: web
+    name: meritable-pwa
+    runtime: node
+    rootDir: pwa
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NEXT_PUBLIC_ISSUER_URL
+        fromService:
+          type: web
+          name: meritable-issuer-api
+          property: host

@@ -1,0 +1,19 @@
+# Meritable Noir Circuit Input Template (Prover.toml)
+
+# Private inputs
+key = "1"
+value = "750"
+salt = "999"
+sig_s_lo = "0"
+sig_s_hi = "0"
+sig_e_lo = "0"
+sig_e_hi = "0"
+
+# Public inputs
+issuer_pubkey_x = "0"
+issuer_pubkey_y = "0"
+user_address = "42"
+target_key = "1"
+operator = "0"
+threshold = "700"
+nonce = "987654"
